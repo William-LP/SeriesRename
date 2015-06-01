@@ -1,0 +1,26 @@
+#!/bin/bash
+if [ $# -ne 0 ]; then
+	if [ "$1" == "--help" ]; then
+		echo "./rename [chemin/du/dossier] [NomDeLaSérie]"
+		echo "Exemple :"
+		echo "./rename /home/william/Séries/Better.Call.Saul/ BetterCallSaul"
+	else
+		for file in * ; do
+			mv -T "$file" ${file// /_} > /dev/null 2>&1
+		 done 
+		i=1
+		for file in *; do
+			if [ "$file" != "rename" ]; then
+				if [ $i -lt 10 ]; then
+					mv "$file" "$10$i" > /dev/null 2>&1
+				else
+					mv "$file" "$1$i" > /dev/null 2>&1
+				fi
+				i=$(( $i + 1 ))
+			fi
+		done
+	fi
+echo "Fichiers renomé !"
+else
+	echo "Erreur d'utilisation, faire ./rename --help"
+fi
