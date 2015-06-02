@@ -1,26 +1,109 @@
 #!/bin/bash
-if [ $# -ne 0 ]; then
-	if [ "$1" == "--help" ]; then
-		echo "./rename [chemin/du/dossier] [NomDeLaSérie]"
-		echo "Exemple :"
-		echo "./rename /home/william/Séries/Better.Call.Saul/ BetterCallSaul"
-	else
-		for file in * ; do
-			mv -T "$file" ${file// /_} > /dev/null 2>&1
-		 done 
-		i=1
-		for file in *; do
-			if [ "$file" != "rename" ]; then
-				if [ $i -lt 10 ]; then
-					mv "$file" "$10$i" > /dev/null 2>&1
-				else
-					mv "$file" "$1$i" > /dev/null 2>&1
-				fi
-				i=$(( $i + 1 ))
-			fi
-		done
+# ------- Valeur par défaut du script ----------
+season="00"
+extension="avi"
+mode="auto"
+
+function help {
+echo -e "\e[1m"
+echo "*** Utilisation du script $0 ***"
+echo -e "\e[0m "
+echo "$0 --nom [NOMDELASERIE] --saison [SAISON] --extention [EXTENSION] --[MODE(auto|manuel)]"
+echo -e "\e[1m"
+echo "Liste des paramètres :"
+echo -e "\e[0m "
+echo "--nom ou -n 		--> Nom de la série (Obligatoire)."
+echo "--saison ou -s 		--> Numéro de la saison (00 par défaut)."
+echo "--extentsion ou -e 	--> Extension du fichier (.avi par défaut)."
+echo "--auto ou -a 		--> Renomme les épisodes selon l'ordre alphabétique (mode par défaut)."
+echo "--manuel ou -m 		--> Invite l'utilisateur à indiquer quel est le numéro de l'épisode affiché au prompt."
+echo -e "\e[1m "
+echo "Exemple : "
+echo -e "\e[0m "
+echo "#> ls"
+echo "#> a.avi b.avi c.avi"
+echo "#> $0 -n Game.of.Thrones -s 01 -e avi --auto"
+echo "#> ls"
+echo "#> Game.of.Thrones.S01E01.avi Game.of.Thrones.S01E02.avi Game.of.Thrones.S01E03.avi"
+}
+function auto {
+for file in * ; do
+	mv -T "$file" ${file// /_} > /dev/null 2>&1
+done 
+
+i=1
+for file in `ls -v` ; do
+	if [ "./$file" != $0 ]; then
+		if [ $i -lt 10 ]; then
+			mv "$file" "$name.S$season""E0$i.$extension" > /dev/null 2>&1
+		else
+			mv "$file" "$name.S$season""E$i.$extension" > /dev/null 2>&1
+		fi
+		i=$(( $i + 1 ))
 	fi
-echo "Fichiers renomé !"
-else
-	echo "Erreur d'utilisation, faire ./rename --help"
-fi
+done
+end
+}
+function manuel {
+for file in * ; do
+	mv -T "$file" ${file// /_} > /dev/null 2>&1
+done 
+
+for file in `ls -v` ; do
+	if [ "./$file" != $0 ]; then
+		echo -n "-------------------------------------"
+		echo -e "\e[1m "
+		echo $file
+		echo -e "\e[0m "		
+		echo -n "Quel est le numéro de cet épisode ? " 
+		read num
+			if [ ${#num} -lt 2 ]; then
+				mv "$file" "$name.S$season""E0$num.$extension" > /dev/null 2>&1
+			else
+				mv "$file" "$name.S$season""E$num.$extension" > /dev/null 2>&1
+			fi
+	fi
+done
+echo -n "-------------------------------------"
+echo -e "\n"
+end
+}
+function main {
+while [ $# -ne 0 ]; do
+	case $1 in 
+		--help|-h)
+			help;exit 0;;
+		--nom|-n)
+			name=$2
+			shift;shift;;
+		--saison|-s)
+			season=$2
+			shift;shift;;
+		--extension|-e)
+			extension=$2
+			shift;shift;;
+		--auto|-a)
+			mode="auto"
+			shift;;
+		--manuel|-m)
+			mode="manuel"
+			shift;;
+		*)
+			echo "Paramètre saisi incorrect ! [ $1 ]"
+			echo "Utilisez --help pour afficher l'aide"
+			exit 1;;
+	esac
+done
+if [ -z ${name+x} ] || [ -z $name ]; then echo "Erreur, vous devez définir un nom à l'aide du paramètre --nom !";exit 1; fi
+if [ $mode == "manuel" ]; then manuel; else auto; fi
+}
+function end {
+echo -e "Le nommage des fichiers est terminé ! \n"
+ls
+}
+main $*
+
+
+
+
+
